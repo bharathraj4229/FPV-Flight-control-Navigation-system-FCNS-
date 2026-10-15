@@ -1,1 +1,511 @@
+DRAFTMAN GOOGLE DRIVE LINK:https://drive.google.com/file/d/1bVzzQ55IjyKcr4iSnSuMfoFVm10O7opI/view?usp=sharing
 
+EXPLANATION :PCB Drafting and Manufacturing Documentation – THEJAS32-Based FPV FCNS
+1. Introduction
+
+The PCB drafting document represents the engineering drawing and manufacturing information for the THEJAS32-Based FPV Flight Control and Navigation System (FCNS).
+
+The document provides a visual representation of the PCB assembly, a Bill of Materials (BOM), a realistic 3D view of the board, and a drill table containing the hole sizes and quantities required for manufacturing.
+
+PCB drafting is an important stage of hardware development because it connects the electronic circuit design with the physical manufacturing process. The schematic defines the electrical connections, the PCB layout defines component placement and copper routing, and the drafting document presents important design information in a form that can be reviewed before fabrication and assembly.
+
+The main purposes of this document are:
+
+To present the physical arrangement of PCB components.
+To document the electronic components used in the design.
+To provide a 3D representation of the assembled PCB.
+To document the drilling requirements for manufacturing.
+To support mechanical inspection and component-placement verification.
+To provide a reference for PCB fabrication, assembly, and future maintenance.
+2. Overview of the Drafting Document
+
+The uploaded PDF contains two pages with different types of engineering information.
+
+Page 1 – PCB views and Bill of Materials
+
+The first page contains:
+
+Top-side PCB view.
+Bill of Materials (BOM).
+Isometric top-side view.
+Top copper-layer view.
+PCB region view.
+
+These views help the designer understand the physical arrangement of components, the PCB copper layout, and the components required for assembly.
+
+Page 2 – Realistic 3D model and drill table
+
+The second page contains:
+
+Realistic 3D view of the PCB assembly.
+Drill table.
+Hole diameters and quantities.
+Plated and non-plated hole information.
+
+The realistic view helps with visual and mechanical inspection, while the drill table provides information required to manufacture the PCB.
+
+3. Top-Side PCB View
+
+The top-side PCB view shows the board from above, including the positions and orientations of the electronic components.
+
+The main controller is positioned near the center of the board, with supporting components and connectors arranged around it.
+
+This view is useful for understanding the overall component-placement strategy.
+
+Purpose of the top-side view
+
+Component identification:
+The view helps identify component locations using their designators, such as U5, U6, U7, J1, and other reference labels.
+
+Placement verification:
+It helps check whether components are placed in their intended positions and orientations.
+
+Connector accessibility:
+The locations of external connectors can be reviewed to ensure that cables and programming interfaces can be accessed.
+
+Mechanical inspection:
+The positions of components relative to the board edges and mounting holes can be inspected.
+
+Assembly reference:
+The top-side view can help during PCB assembly, troubleshooting, and visual inspection.
+
+For this FPV flight controller, suitable component placement is important because the board integrates processing, motion sensing, power conversion, and external communication interfaces within a compact area.
+
+Design consideration: The top-side view provides placement information, but electrical connectivity must be verified using the schematic and PCB net information.
+
+4. Isometric PCB View
+
+The first page also includes an isometric view of the PCB.
+
+An isometric view presents the board from an angled perspective, making it easier to understand its physical arrangement than a flat top view alone.
+
+It helps visualize the relationship between the PCB outline, component positions, connectors, and mounting features.
+
+Advantages of the isometric view
+Provides a more realistic understanding of the board's physical arrangement.
+Helps identify component orientation and approximate spacing.
+Supports mechanical inspection before fabrication.
+Helps communicate the design to project reviewers and team members.
+Provides an additional reference for component assembly.
+
+For the THEJAS32-based FCNS project, the isometric view helps communicate how the flight-control electronics are arranged on the PCB.
+
+5. Bill of Materials (BOM)
+
+The Bill of Materials is a list of the electronic components required to assemble the PCB.
+
+The BOM in the drafting document contains component designators, descriptions or part numbers, and quantities.
+
+Each component has a reference designator that identifies its position in the circuit design.
+
+For example:
+
+U5 identifies the THEJAS32 controller.
+U6 identifies the ICM-42688-P motion sensor.
+U7 identifies the BMI270 motion sensor.
+U4 identifies the DPS310 barometric sensor.
+U2 identifies the CH340C USB-to-serial interface.
+U3 identifies the W25Q128-family external flash device shown in the BOM.
+
+These reference designators allow the schematic, PCB layout, BOM, and assembly documentation to be related to one another.
+
+5.1 Controller and processing components
+Reference designator	Component listed in the BOM	Purpose in the design
+U5	THEJAS32	Main controller for processing sensor information and executing flight-control software
+Y1	ASEM1-100.000MHZ-LC-T	100 MHz oscillator listed in the BOM
+Y2	ABM8-27.000MHZ-B2-T	27 MHz crystal listed in the BOM
+
+The THEJAS32 is the main processing component identified in the design.
+
+The controller is intended to coordinate the connected sensors and interfaces according to the firmware and circuit implementation.
+
+Clock components provide timing references for the circuits with which they are associated. Their actual connections and electrical requirements must be confirmed in the schematic and component datasheets.
+
+5.2 Motion-sensing and navigation-related components
+Reference designator	Component listed in the BOM	Purpose
+U6	ICM-42688-P	Inertial measurement and motion sensing
+U7	BMI270	Additional inertial measurement and motion sensing
+U4	DPS310XTSA1	Barometric pressure sensing
+
+The motion sensors provide measurements that can be used by the flight-control software to estimate the UAV's movement and orientation.
+
+The ICM-42688-P and BMI270 are listed as separate devices, allowing the design to incorporate two inertial sensors.
+
+The DPS310 is a barometric pressure sensor. Its measurements can support pressure-based altitude estimation when processed and calibrated by the system software.
+
+The exact sensor buses, addresses, interrupt connections, and power requirements must be checked against the schematic.
+
+5.3 Communication and storage components
+Reference designator	Component listed in the BOM	Purpose
+U2	CH340C	USB-to-serial communication interface
+U3	W25Q128-family flash device	External non-volatile memory
+U1, U9	TPS54360DDA	Switching power-conversion devices
+
+The CH340C is a USB-to-serial interface device. When connected appropriately, it can provide a serial communication path between a computer and the controller.
+
+The external flash device provides non-volatile storage. Depending on the firmware and circuit design, this memory can be used for configuration data, logs, firmware storage, or other persistent information.
+
+The TPS54360 devices are listed as switching power-conversion components. Their exact circuit functions and output rails must be confirmed from the schematic.
+
+5.4 Power-management components
+
+The BOM includes the following inductor values:
+
+Reference designator	Listed value	Quantity
+L1, L2	15 µH	2
+L3	2.2 µH	1
+L4	1 µH	1
+
+Inductors are commonly used in switching power converters to store and transfer energy during the switching cycle.
+
+Their values, current ratings, saturation characteristics, and physical footprints must be suitable for the corresponding power circuits.
+
+The BOM also lists two TPS62130RGTR devices under reference designators U8 and U10. These are switching regulator devices, but their specific output voltages and functions should be confirmed from the schematic.
+
+5.5 Capacitors
+
+The BOM lists several capacitor groups, including:
+
+Listed value	Quantity	General purpose
+0.1 µF	44	Local high-frequency decoupling and noise suppression
+10 µF and 22 µF	19 combined	Bulk or local supply filtering, depending on circuit position
+3.3 nF	2	Circuit-specific filtering or timing functions
+
+Capacitors help maintain stable power supplies and support reliable operation of electronic components.
+
+A 0.1 µF capacitor is commonly placed close to an IC's supply pins to provide a local path for high-frequency transient currents.
+
+Larger capacitors, such as 10 µF and 22 µF, can provide local energy storage and reduce supply-voltage variations.
+
+The actual purpose of each capacitor depends on its position in the schematic. Capacitor voltage ratings, dielectric types, and placement must be verified before fabrication.
+
+5.6 Resistors
+
+The BOM lists a group of 32 resistors with several resistance values, along with a separate 5.1 kΩ resistor identified as R15.
+
+Resistors can perform different functions depending on their circuit connections.
+
+Common functions include:
+
+Pull-up and pull-down biasing.
+Signal-level definition.
+Voltage division.
+Current limiting.
+Feedback in power converters.
+Configuration and control of electronic interfaces.
+
+The exact purpose of each resistor must be determined from the schematic. The resistance values alone are not sufficient to identify the function of every resistor.
+
+5.7 Connectors and switches
+
+The BOM lists several connectors and two switches.
+
+Reference designator	Component listed in the BOM	General purpose
+J1	SM02B-SRSS-TB(LF)(SN)	Two-position connector
+J2	USB4105-GF-A	USB Type-C connector
+J3, J5	SM04B-SRSS-TB(LF)(SN)	Four-position connectors
+J4	SM05B-SRSS-TB(LF)(SN)	Five-position connector
+J6	SM06B-SRSS-TB(LF)(SN)	Six-position connector
+P1	SM08B-SRSS-TB(LF)(SN)	Eight-position connector
+SW1, SW2	EVQ-PUJ02K	Switches
+
+The connectors provide physical connection points for the circuits and external equipment.
+
+The USB Type-C connector can provide a USB interface, but its actual functions depend on the connections to the controller, USB-to-serial interface, power circuit, and protection components.
+
+The switches may be used for reset, boot selection, or other control functions, depending on their schematic connections.
+
+Important: Connector pin counts do not identify their functions. Check the schematic net labels to determine which pins carry power, ground, communication signals, or control signals.
+
+5.8 Diodes and transistor
+
+The BOM also lists several semiconductor components.
+
+Reference designator	Component listed in the BOM	General purpose
+D1, D3, D4, D5	150060GS75000	Diodes; exact circuit functions depend on connectivity
+D2	SMBJ26A	Transient-voltage suppression diode
+Q1	AO3407A	P-channel MOSFET
+
+The SMBJ26A is a transient-voltage suppression (TVS) diode. It is designed to help protect a circuit from voltage transients within its specified operating limits.
+
+The AO3407A is a P-channel MOSFET that can be used for switching or power-control functions, depending on the circuit configuration.
+
+The other listed diodes may provide indication, protection, or other functions. Their exact purposes must be confirmed from the schematic.
+
+5.9 Video-related component
+
+The BOM lists one AT7456E device.
+
+The AT7456E is associated with on-screen display applications. In a suitable video circuit, an OSD device can overlay information onto a compatible video signal.
+
+For an FPV application, this type of device may be used to display information such as battery voltage, flight status, or navigation data if the complete video circuit and firmware support those features.
+
+The presence of the component in the BOM does not, by itself, establish that the video path or OSD functionality has been fully implemented or tested.
+
+6. Top Copper-Layer View
+
+The drafting document includes a top copper-layer view of the PCB.
+
+The copper layer contains conductive tracks and copper features used to connect electronic components.
+
+The routing pattern represents the physical implementation of electrical connections defined by the circuit design.
+
+Main purposes
+
+Electrical interconnection: Copper tracks connect component pads according to the PCB net assignments.
+
+Signal routing: Tracks provide paths for communication and control signals between the controller and peripherals.
+
+Power distribution: Appropriately sized tracks and copper regions distribute supply voltages to connected components.
+
+Routing organization: The PCB layout organizes electrical connections within the available board area.
+
+Important design considerations
+Maintain the required clearance between different electrical nets.
+Select trace widths according to current and thermal requirements.
+Avoid unnecessary routing around sensitive signals.
+Follow appropriate layout practices for switching regulators.
+Check the continuity of ground and power connections.
+Verify that no unintended copper connections exist.
+
+The copper-layer image provides a visual representation of the routing, but detailed electrical verification must be performed in the PCB design software.
+
+7. PCB Region View
+
+The first page includes a region view of the PCB.
+
+This view represents the board's defined region or outline area in the drafting document.
+
+The PCB region determines the physical area occupied by the board and provides a reference for its mechanical boundary.
+
+Importance of the PCB region
+Defines the board area used by the layout.
+Supports dimensional and mechanical checks.
+Helps establish the board outline for fabrication.
+Provides a reference for component-to-edge clearance.
+Helps verify the relationship between the board and its mounting features.
+
+The final board outline should be checked against the intended mechanical design before manufacturing.
+
+8. Realistic 3D PCB Model
+
+The second page contains a realistic 3D representation of the PCB assembly.
+
+The model shows the PCB with its components and connectors represented in three dimensions.
+
+Unlike a copper-layer view, the 3D model focuses on the physical appearance and arrangement of the assembled board.
+
+8.1 Main controller placement
+
+The 3D view shows the main controller package positioned near the center of the board.
+
+The surrounding components support the processing, power-management, sensing, and communication functions of the design.
+
+A central controller placement can help organize the connections to peripheral components, although the electrical and thermal performance depends on the complete layout.
+
+8.2 Peripheral components
+
+The 3D model shows smaller components arranged around the main controller.
+
+These components may include sensors, passive components, regulators, memory devices, and interface circuitry as identified in the BOM.
+
+Their physical positions affect routing, assembly, accessibility, and mechanical clearance.
+
+8.3 Connectors
+
+The model displays connectors positioned around the PCB.
+
+Connector placement is important because the board must provide enough space for plugs, cables, and external connections.
+
+For an FPV controller, connector access is useful during programming, debugging, sensor integration, and connection to external hardware.
+
+8.4 Mounting holes
+
+The model shows mounting holes near the corners of the board.
+
+These holes allow the PCB to be attached to a suitable mechanical structure.
+
+Before fabrication, verify the hole spacing, diameter, board-edge clearance, and compatibility with the intended frame and mounting hardware.
+
+8.5 Benefits of 3D inspection
+
+The 3D model helps identify potential mechanical issues before the PCB is manufactured.
+
+It can be used to check:
+
+Component orientation.
+Connector positions.
+Component-to-edge clearance.
+Mounting-hole locations.
+Possible interference with screws or standoffs.
+Approximate component height and board appearance.
+
+The accuracy of these checks depends on the component footprints and 3D models used in the PCB design.
+
+9. Drill Table and Hole Information
+
+The second page includes a drill table containing hole symbols, quantities, hole sizes, and plating information.
+
+The drill table is important because holes are required for electrical interconnections and mechanical mounting.
+
+The table in the supplied PDF reports 142 total holes.
+
+The displayed drill entries are summarized below.
+
+Hole size shown	Plating information	Quantity
+0.20 mm	Plated	16
+0.30 mm	Plated	10
+0.30 mm	Plated	106
+0.60 mm	Plated	4
+0.65 mm	Non-plated	2
+1.50 mm	Plated	4
+Total		142
+
+The PDF displays two separate drill-table entries with a hole size of 0.30 mm. They are retained as separate entries here because they appear as separate rows in the drawing.
+
+9.1 Plated holes
+
+A plated hole has a conductive metal layer on its inner surface.
+
+Depending on the PCB design, plated holes can be used for:
+
+Vias connecting different copper layers.
+Through-hole component connections.
+Other electrical interconnections between layers.
+
+The final use of each hole depends on its pad, via, and net assignments in the PCB design.
+
+9.2 Non-plated holes
+
+A non-plated hole does not have a conductive metal lining.
+
+Non-plated holes are commonly used for mechanical purposes, such as mounting, alignment, or fixing the PCB to a structure.
+
+The two 0.65 mm non-plated holes shown in the table should be checked against the PCB design to confirm their intended mechanical function.
+
+9.3 Hole diameter and manufacturing accuracy
+
+The hole diameter affects the manufacturing process and the fit of components or mounting hardware.
+
+The PCB manufacturer must be able to produce the specified drill sizes and meet the required tolerances.
+
+Before manufacturing, verify:
+
+Finished hole diameters.
+Plated and non-plated hole definitions.
+Drill symbols and their corresponding locations.
+Mounting-hole dimensions.
+Via and annular-ring requirements.
+Compatibility with the manufacturer's fabrication capabilities.
+
+The drill table should be generated from the final PCB design so that it matches the manufacturing output.
+
+10. Relationship Between the BOM, PCB Layout, and 3D Model
+
+The BOM, PCB layout, and 3D model provide different but complementary information.
+
+Design document	Main purpose
+Schematic	Defines electrical connections and circuit functionality
+PCB layout	Defines component placement and copper routing
+BOM	Lists components and quantities required for assembly
+Top-side view	Shows component positions and orientations
+Copper-layer view	Shows conductive tracks and copper features
+3D model	Shows the physical arrangement of the assembled PCB
+Drill table	Documents hole sizes, quantities, and plating information
+
+All these documents must agree with one another.
+
+For example, a component listed in the BOM must have a corresponding footprint in the PCB design, and that footprint must match the physical component selected for assembly.
+
+Similarly, the drill table and manufacturing files must correspond to the final PCB layout.
+
+Maintaining consistency between these documents reduces the risk of incorrect components, unsuitable footprints, and manufacturing errors.
+
+11. Manufacturing Preparation
+
+Before sending the PCB for fabrication, the design should be reviewed carefully.
+
+11.1 Component verification
+Confirm the component part numbers.
+Check component footprints against datasheets.
+Verify component orientations and pin numbering.
+Confirm connector pin assignments.
+Check capacitor voltage ratings and resistor values.
+Verify that the selected components are compatible with their intended circuits.
+11.2 PCB verification
+Run the Design Rule Check (DRC).
+Check track clearances and trace widths.
+Verify copper-to-board-edge clearances.
+Check the board outline and mounting holes.
+Review the ground and power connections.
+Inspect the placement of sensitive components.
+Check the switching-regulator layout.
+Confirm that the footprints match the selected components.
+11.3 Manufacturing-file verification
+
+Generate the required manufacturing files from the final PCB design.
+
+Depending on the manufacturer, these may include:
+
+Gerber files for the copper, solder-mask, silkscreen, and board-outline layers.
+NC drill files for holes and vias.
+Fabrication notes.
+Bill of Materials.
+Pick-and-place data, if required for assembly.
+
+Inspect the generated files before submission to ensure that they represent the intended final design.
+
+11.4 Assembly verification
+
+After fabrication and assembly:
+
+Inspect the PCB for visible manufacturing defects.
+Check component orientation and soldering quality.
+Verify that there are no unintended shorts between supply rails.
+Apply power using an appropriate current-limited supply.
+Measure the required supply voltages.
+Verify controller programming and debugging interfaces.
+Test the sensors and communication interfaces individually.
+Perform system-level testing after the individual circuits have been verified.
+
+The PCB should not be considered fully validated until electrical and functional tests have been completed successfully.
+
+12. Importance of PCB Drafting in the FCNS Project
+
+PCB drafting is an important part of the development process because it presents the design in a form that can be reviewed by designers, fabricators, and assembly engineers.
+
+For the THEJAS32-based FPV FCNS project, the drafting document supports several objectives.
+
+Mechanical verification
+
+The top-side and 3D views help review component placement, connector accessibility, mounting holes, and the overall board arrangement.
+
+Component management
+
+The BOM identifies the components and quantities required for PCB assembly.
+
+Manufacturing preparation
+
+The drill table provides hole-size and plating information that supports PCB fabrication.
+
+Design communication
+
+The drawing helps explain the physical implementation of the flight-control electronics to project reviewers and other engineers.
+
+Maintenance and debugging
+
+Component reference designators and layout views can help locate components during troubleshooting and future design modifications.
+
+These functions make PCB drafting an important link between electronic circuit design, physical implementation, and manufacturing.
+
+13. Conclusion
+
+The DRAFTMAN PDF.pdf document provides manufacturing-oriented information for the THEJAS32-Based FPV Flight Control and Navigation System.
+
+The top-side and isometric views present the component arrangement, while the copper-layer view provides a visual representation of PCB routing. The BOM documents the components and their quantities. The realistic 3D model supports mechanical inspection, and the drill table documents the hole sizes and plating information required for fabrication.
+
+Together, these elements support PCB review, manufacturing preparation, assembly planning, and technical documentation.
+
+Before fabrication, the final schematic, PCB layout, BOM, drill table, and manufacturing files should be checked for consistency. After assembly, the board should undergo electrical and functional testing to verify that the controller, sensors, power-management circuits, and external interfaces operate as intended.
+
+The drafting document supports design review and manufacturing preparation; it does not, by itself, confirm that the assembled board has passed electrical or flight-performance testing.
