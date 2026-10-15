@@ -1,1 +1,944 @@
+SCH DIAGRAM LINK:https://drive.google.com/file/d/1js1mc64nRL5Z854cr-ZSw8xZNvVx5QaV/view?usp=sharing
 
+EXPLANATION OF SCH DIAGRAM:
+1. Project Overview
+
+The THEJAS32-Based FPV Flight Control and Navigation System (FCNS)
+is a PCB-based embedded hardware platform intended for First-Person View
+(FPV) unmanned aerial vehicles (UAVs). The schematic combines
+power-management circuits, a central controller, motion sensors, a
+barometric sensor, navigation interfaces, programming and debugging
+connections, external memory, receiver and Electronic Speed Controller
+(ESC) interfaces, and auxiliary telemetry, video, LED, and buzzer
+connections.
+
+The THEJAS32 System-on-Chip (SoC) is intended to act as the central
+processing device. In the intended system, the controller collects
+sensor measurements, receives pilot commands, runs flight-control
+firmware, and produces control signals for external ESCs. The ESCs---not
+the controller GPIO pins---supply and regulate the electrical power
+delivered to the motors.
+
+Design status: This README explains the intended function of the
+blocks shown in the supplied schematic. It does not certify that the
+circuit is electrically correct. Confirm every pin, voltage, component
+value, footprint, and regulator rating against the exact component
+datasheets and the THEJAS32 hardware documentation before fabrication.
+
+2. Project Objectives
+
+Design a PCB-based FPV flight-control and navigation hardware
+platform around the THEJAS32 SoC.
+
+Integrate a primary ICM-42688-P inertial measurement unit (IMU) and
+a secondary BMI270 IMU.
+
+Provide a DPS310 barometric pressure sensor interface for pressure
+measurement and altitude estimation.
+
+Provide GNSS and compass interfaces for navigation-related
+measurements.
+
+Generate the required power rails using the power-management
+circuits shown in the schematic.
+
+Provide USB Type-C connectivity and a USB-to-UART bridge for the
+supported programming, communication, or debugging workflow.
+
+Include external SPI flash memory where required by the controller
+architecture.
+
+Provide receiver and ESC connections.
+
+Include interfaces for telemetry, video-related circuitry, LEDs, and
+a buzzer.
+
+Prepare a documented design that can be checked, tested, and
+developed further in Altium Designer.
+
+3. System Architecture
+
+The schematic is divided into functional blocks. The following diagram
+is a conceptual overview, not a replacement for the exact electrical
+connections in the schematic.
+
+                         BATTERY INPUT
+                              |
+                              v
+                     INPUT PROTECTION
+                       AND FILTERING
+                              |
+                              v
+                       POWER CONVERSION
+                 +------------+------------+
+                 |            |            |
+                 v            v            v
+                5 V          3.3 V        1.2 V
+                 |            |            |
+                 +------------+------------+
+                              |
+                              v
+                        THEJAS32 SoC
+                              |
+        +---------------------+----------------------+
+        |                     |                      |
+        v                     v                      v
+   PRIMARY IMU            SECONDARY IMU           BAROMETER
+   ICM-42688-P              BMI270                 DPS310
+        |                     |                      |
+        +---------------------+----------------------+
+                              |
+                              v
+                     FLIGHT-CONTROL FIRMWARE
+                              ^
+                              |
+                 +------------+------------+
+                 |            |            |
+                 v            v            v
+              RECEIVER       GNSS        COMPASS
+                 |
+                 v
+          PILOT COMMANDS
+                 |
+                 v
+          MOTOR-CONTROL OUTPUTS
+                 |
+                 v
+                ESCs
+                 |
+                 v
+             UAV MOTORS
+
+     Other schematic blocks:
+     - USB Type-C and USB-to-UART
+     - SPI flash memory
+     - Telemetry interface
+     - Video/OSD-related circuitry
+     - LED and buzzer connections
+
+The schematic also shows a 10 V converter. That rail is not included in
+the simplified diagram above because its intended load must be
+identified and its operation depends on the available input voltage.
+
+4. Power Input and Power Management
+
+4.1 Battery input
+
+The battery connector is the entry point for power. The input section
+shown in the schematic includes a connector, a transistor/MOSFET-like
+component, a resistor, a diode, and capacitors.
+
+Their intended roles may include input connection, switching or
+reverse-polarity protection, biasing, transient protection, and
+filtering. The exact role of each part depends on its full part number,
+orientation, and connection.
+
+Checks required: - Identify the battery chemistry and minimum,
+nominal, and fully charged voltage. - Verify the maximum voltage rating
+of every component connected to the input. - Confirm the orientation and
+ratings of the protection diode and transistor/MOSFET. - Confirm the
+purpose and value of each resistor. - Check capacitor voltage ratings
+and polarity where applicable. - Ensure the connector and copper path
+can handle the intended current.
+
+Do not assume that a diode is a TVS diode or that a MOSFET provides
+reverse-polarity protection until the part number and circuit topology
+have been verified.
+
+4.2 What a buck converter does
+
+A buck converter is a switching DC-to-DC regulator that converts a
+higher DC input voltage into a lower regulated DC output.
+
+A typical buck-converter circuit uses a switching regulator, an
+inductor, input and output capacitors, and feedback components.
+Depending on the IC, the switching element and freewheeling path may be
+internal or external.
+
+Operating sequence:
+
+Switch ON: Energy is transferred from the input through the
+switching stage and inductor to the output. The inductor stores
+energy in its magnetic field.
+
+Switch OFF: The inductor current continues through the
+converter's freewheeling path and supplies the load.
+
+Feedback control: The regulator senses the output and adjusts
+switching to keep the output near its target voltage.
+
+Filtering: Capacitors help reduce input and output voltage
+ripple and support short load transients.
+
+For an ideal buck converter in continuous-conduction mode:
+
+VOUT = D × VIN
+
+where VOUT is output voltage, VIN is input voltage, and D is the
+switching duty cycle. Real converters have losses, so the equation is an
+approximation.
+
+A buck converter can only regulate to an output below its input with the
+required operating headroom. It cannot maintain 10 V from an input that
+has fallen below 10 V.
+
+4.3 5 V buck-converter block
+
+The schematic labels a circuit as the 5 V buck converter and shows a
+VCC_5V output net. The regulator appears to belong to the TPS54360
+family, but the exact device suffix must be checked against the BOM and
+schematic symbol.
+
+The functional parts of a typical switching-regulator circuit are:
+
+Pin or component                    Typical role
+
+VIN                                 Receives the converter input supply
+
+GND                                 Ground reference and current return
+
+EN                                  Enables or disables the regulator
+
+BOOT                                Supports operation of the high-side
+switching stage
+
+SW                                  Switching node connected to the
+power stage
+
+L1                                  Inductor that stores and transfers
+energy
+
+FB                                  Feedback input used to regulate the
+output
+
+COMP                                Control-loop compensation, where
+provided
+
+RT/CLK                              Switching-frequency setting or
+synchronization, depending on the
+IC
+
+Input capacitors                    Supply switching current and reduce
+input ripple
+
+Output capacitors                   Reduce output ripple and support
+load transients
+
+The feedback relationship for a common resistor-divider regulator is:
+
+VOUT = VREF × (1 + RTOP / RBOTTOM)
+
+Use this equation only if it matches the selected IC's feedback
+topology. The reference voltage and resistor values must come from the
+correct datasheet and design calculations.
+
+The schematic's current annotation must not be treated as a guaranteed
+continuous rating without checking the exact IC, input range, inductor
+saturation current, capacitor ratings, thermal performance, and PCB
+copper.
+
+4.4 10 V buck-converter block
+
+The schematic includes a circuit labelled 10 V buck converter. Its
+purpose is to generate a 10 V rail for a compatible load, if the system
+actually requires one.
+
+Before keeping this converter in the design: - Identify every load
+connected to the 10 V net. - Confirm each load's permitted voltage range
+and current demand. - Verify that the battery voltage remains
+sufficiently above 10 V throughout the required operating range. - Check
+converter thermal performance and component ratings.
+
+If no circuit needs 10 V, the converter may be unnecessary. If the input
+falls below the regulator's required headroom, a buck-only converter
+cannot maintain a regulated 10 V output.
+
+4.5 3.3 V buck-converter block
+
+The schematic labels a 3.3 V buck converter and a VCC_3V3 net.
+This rail is intended for compatible controller, sensor, memory, and
+interface circuits.
+
+The regulator must supply the combined current of all loads connected to
+the rail. Confirm the voltage requirements of each device rather than
+assuming all digital pins or modules operate at 3.3 V.
+
+The inductor transfers energy through the switching cycle, feedback
+regulates the output, and capacitors reduce ripple and help with
+transient loads.
+
+4.6 1.2 V converter and controller power domains
+
+A 1.2 V converter is shown on another schematic page, with its output
+labelled VCC_1V2. This appears intended for a designated low-voltage
+controller domain.
+
+The exact purpose of this rail must be confirmed against the THEJAS32
+documentation. A SoC may have separate core and I/O supplies, and those
+supplies are not interchangeable. Do not apply 1.2 V to a pin intended
+for 3.3 V, or 3.3 V to a core pin rated for 1.2 V.
+
+Confirm: - Required voltage and tolerance. - Maximum and typical
+current. - Ripple requirements. - Startup sequencing, if required. -
+Power-good, enable, and reset requirements. - Output capacitance and
+regulator stability requirements.
+
+4.7 Bulk capacitors and decoupling capacitors
+
+Capacitors on a supply rail have different roles depending on their
+value, placement, and the circuit.
+
+Bulk capacitance: Provides local stored charge and supports
+slower changes in load current.
+
+Local decoupling: Provides a short current path for rapid
+current changes and reduces high-frequency supply disturbances.
+
+Converter input capacitance: Supplies switching current and
+helps manage input ripple.
+
+Converter output capacitance: Helps smooth the output and
+affects transient response and control-loop stability.
+
+A simplified capacitor relationship is:
+
+ΔV ≈ ΔI × Δt / C
+
+This estimates the voltage change caused by a current change over a
+short interval, ignoring ESR, ESL, and regulator response.
+
+Place decoupling capacitors close to the relevant power pins and follow
+the component manufacturer's layout recommendations. A capacitor placed
+far from the IC may be less effective at high frequencies because of
+trace inductance.
+
+4.8 Buck converter versus LDO
+
+A low-dropout regulator (LDO) regulates voltage using a linear pass
+element. A buck converter uses switching conversion.
+
+Feature                 Buck converter          LDO
+
+Conversion method       Switching               Linear
+
+Efficiency              Usually better for      Strongly affected by
+substantial voltage     input-output voltage
+reduction and higher    difference
+load current
+
+Heat                    Usually lower at        Can be significant at
+comparable loads when   high current
+well designed
+
+Components              Typically requires an   Usually simpler
+inductor and
+switching-related
+components
+
+Noise                   Switching ripple must   Often useful for
+be managed              low-noise rails,
+depending on the device
+
+For a 5 V to 3.3 V LDO delivering 2 A, the approximate pass-element
+dissipation is:
+
+P = (VIN - VOUT) × IOUT
+
+P = (5 - 3.3) × 2 = 3.4 W
+
+This is substantial heat for a small PCB. The actual thermal result
+depends on package, copper area, airflow, and thermal resistance.
+Regulator selection must be based on the load, noise needs, efficiency,
+and thermal design.
+
+5. THEJAS32 Controller, Clock, Reset, and Boot
+
+5.1 Role of the controller
+
+The THEJAS32 SoC is the central processing block in the intended FCNS
+architecture. It is expected to communicate with peripherals and execute
+the firmware that processes sensor measurements and pilot commands.
+
+The controller's actual peripheral availability, voltage domains, boot
+process, and pin assignments must be confirmed using the exact device
+documentation. A net label alone does not prove that a chosen pin
+supports a given function.
+
+5.2 Controller pin groups
+
+Pin group                           Purpose
+
+Power pins                          Supply the required internal
+voltage domains
+
+Ground pins                         Provide electrical return paths
+
+GPIO                                General-purpose digital
+input/output
+
+SPI                                 Serial connection to supported
+peripherals
+
+I2C                                 Two-wire peripheral communication
+
+UART                                Asynchronous serial communication
+
+Timer/PWM-capable pins              May generate timed control outputs
+if supported
+
+Reset                               Places the controller into a
+defined reset state
+
+Boot configuration                  Selects a startup mode where
+supported
+
+Verify the pin multiplexing and electrical characteristics before
+assigning each function.
+
+5.3 Oscillator or clock circuit
+
+The schematic includes an oscillator-related circuit labelled OSC_OUT.
+The clock source supplies a timing reference to the controller or
+another circuit, depending on the actual connection.
+
+The clock frequency, output type, voltage, load requirements, and pin
+assignment must match the selected device. An oscillator module and a
+crystal are not interchangeable without considering the required circuit
+topology.
+
+Incorrect clock wiring or an incompatible frequency can prevent startup
+or cause timing and communication failures. Follow the controller and
+oscillator layout recommendations.
+
+5.4 Reset and boot configuration
+
+Reset circuitry helps place the controller into a known startup state.
+Boot-related pins may select normal operation, a bootloader, or another
+startup mode, depending on the SoC.
+
+The exact meaning of the boot switch and resistor arrangement must be
+checked in the THEJAS32 documentation. Do not assume that a generic
+microcontroller boot sequence applies to this device.
+
+6. USB Type-C and USB-to-UART
+
+6.1 USB Type-C connector
+
+The USB Type-C connector provides the physical connection to a computer.
+Type-C describes the connector and connection system; it does not
+automatically mean the controller supports native USB programming.
+
+The schematic includes USB-related signals, VBUS, CC1/CC2, ground, and
+connector connections.
+
+VBUS: USB bus power. It must not be connected directly to an
+incompatible controller rail.
+
+CC1 and CC2: Configuration-channel pins used for connection
+detection and role configuration. The required resistor arrangement
+depends on whether the board is a sink, source, or dual-role device.
+
+USB data lines: Carry USB communication and require routing
+appropriate to the implemented USB speed.
+
+Ground and shield: Provide return and shielding connections
+according to the connector and board design.
+
+Check the connector pinout, CC resistors, ESD protection, differential
+routing, and intended USB power path.
+
+6.2 USB-to-UART bridge
+
+The schematic includes a USB-UART bridge, apparently from the CH340
+family; confirm the exact part number.
+
+A USB-UART bridge converts USB communication from the computer into UART
+logic signals for a controller or other serial device.
+
+UART commonly uses: - TX: Transmit data. - RX: Receive data. -
+GND: Shared signal reference.
+
+The bridge's TX normally connects to the target's RX, and the bridge's
+RX connects to the target's TX. The logic voltage must be compatible
+with the target.
+
+The bridge can support a serial console or programming workflow only if
+the controller firmware and bootloader support it. A USB-UART bridge is
+not the same as a native USB interface.
+
+6.3 Programming verification
+
+Before relying on the connector: 1. Confirm whether the THEJAS32
+supports native USB, UART bootloading, or an external programming/debug
+interface. 2. Verify the connector and bridge pin assignments. 3. Check
+reset and boot-control requirements. 4. Confirm logic voltage and USB
+power isolation/protection. 5. Test communication before attempting
+firmware loading.
+
+7. Motion Sensors and Barometer
+
+7.1 Primary IMU: ICM-42688-P
+
+The schematic labels the ICM-42688-P as the primary gyro/IMU. This
+device integrates a three-axis accelerometer and a three-axis gyroscope.
+
+The accelerometer measures specific force along three axes. Its
+measurements can contribute to attitude estimation, but acceleration
+caused by movement must be distinguished from gravity.
+
+The gyroscope measures angular velocity around three axes and is
+important for detecting rapid rotational movement.
+
+The controller reads the measurements and uses them in the
+firmware's estimation and control process.
+
+The schematic shows SPI-related signals such as clock, MOSI, MISO, chip
+select, and an interrupt. The exact pin connections, supply
+requirements, bus mode, and interrupt configuration must match the
+sensor datasheet.
+
+7.2 Secondary IMU: BMI270
+
+The BMI270 is labelled as the secondary gyro/IMU. It also provides
+three-axis acceleration and angular-velocity measurements.
+
+A second IMU may allow the firmware to compare measurements, identify
+implausible readings, or implement a redundancy strategy. A second
+sensor does not automatically provide fault tolerance: firmware must
+read both devices, calibrate them, assess their validity, and define a
+response to failures.
+
+The schematic assigns the secondary IMU to another SPI signal group.
+Verify the controller's SPI capability, chip-select wiring, sensor
+configuration, and voltage compatibility.
+
+7.3 Why sensor interrupts are useful
+
+An interrupt line can notify the controller that a configured sensor
+event has occurred---for example, when new measurement data is ready.
+The sensor and firmware must be configured consistently for the
+interrupt to work. Check the signal polarity, output type, pull-up
+requirement, and controller pin configuration.
+
+7.4 Barometer: DPS310
+
+The DPS310 is shown in the barometer block. It measures atmospheric
+pressure. Pressure changes can help estimate altitude, but pressure is
+affected by weather, temperature, airflow, propeller turbulence, and
+sensor noise.
+
+The schematic shows an I2C connection: - SDA: Serial data. - SCL:
+Serial clock. - VDD: Sensor supply. - GND: Ground.
+
+I2C lines typically require pull-up resistors. Their values depend on
+bus voltage, speed, capacitance, and device requirements. Ensure the
+sensor's I2C logic level is compatible with the controller.
+
+A barometer measures pressure, not geometric altitude directly. Altitude
+estimation requires an appropriate model and calibration and may be
+combined with other measurements in firmware.
+
+8. Receiver and ESC Interfaces
+
+8.1 Receiver interface
+
+The receiver obtains radio commands from the pilot's transmitter and
+passes them to the flight controller through a supported signal
+interface.
+
+The interface must be compatible with the receiver's: - Supply
+voltage. - Signal voltage. - Communication protocol. - Pinout. -
+Firmware configuration.
+
+The receiver connector does not itself decode commands; the controller
+firmware must support the receiver protocol.
+
+8.2 ESC interface
+
+An Electronic Speed Controller controls the electrical power delivered
+to a motor. The flight controller sends a command signal; the ESC
+interprets that command and controls the motor.
+
+For a typical quadcopter, the controller needs independent outputs for
+four motor channels. The firmware maps the calculated control response
+to the appropriate motor commands.
+
+Signal and power are different paths. A control signal does not
+carry motor current. If the PCB distributes battery power to ESCs, that
+path needs suitable connectors, copper, protection, and thermal
+analysis. Do not infer the purpose of the schematic's VIN pin at the
+ESC connector without checking the actual pinout and intended
+connection.
+
+8.3 Safe ESC testing
+
+Remove propellers during initial electrical tests.
+
+Verify each output and channel mapping.
+
+Confirm the ESC's accepted control protocol and voltage levels.
+
+Check motor direction and failsafe behavior in a controlled setup.
+
+Do not perform a flight test until power, sensor, receiver, and
+failsafe checks are complete.
+
+9. GNSS and Compass
+
+9.1 GNSS interface
+
+A GNSS receiver can provide geographic position, ground speed, and
+timing information. The schematic shows UART-related signals labelled
+GN_TX and GN_RX.
+
+For a conventional UART connection, the module's TX connects to the
+controller's RX, and the module's RX connects to the controller's TX.
+Confirm signal directions from the actual connector pinout rather than
+relying on net names alone.
+
+The GNSS module must receive a compatible supply voltage and use a
+protocol supported by the firmware.
+
+9.2 Compass interface
+
+A compass module typically contains a magnetometer that measures the
+local magnetic field. Its readings can contribute to heading estimation
+after calibration and appropriate compensation.
+
+The schematic includes I2C-related labels GN_SCL and GN_SDA in the
+GNSS/compass section. Confirm which external module uses these signals
+and ensure the pull-ups and voltage levels are suitable.
+
+Magnetic interference from current-carrying conductors, motors, magnets,
+and other electronics can affect compass readings. Physical placement
+and calibration matter.
+
+10. External SPI Flash and Boot Circuit
+
+The schematic shows an external SPI flash device that appears to be from
+the W25Q family. Confirm the exact part number, memory capacity,
+package, and supply requirements.
+
+SPI flash is nonvolatile memory: it retains data without power.
+Depending on the system architecture, it may store firmware, boot data,
+configuration, calibration, or other persistent information. Its exact
+role must be confirmed from the THEJAS32 boot and memory documentation.
+
+Common SPI signals include: - CS: Chip select. - CLK: Serial
+clock. - Data input/output signals. - VCC: Flash supply. - GND:
+Ground.
+
+A chip-select pull-up may keep the flash deselected while the controller
+pins are high-impedance during startup. The required pull-up, data-pin
+biasing, and boot behavior depend on the flash and controller
+documentation.
+
+A local supply-decoupling capacitor should be placed close to the flash
+power pin. Check whether the controller expects this external flash and
+whether the chosen memory device and boot configuration are compatible.
+
+11. Telemetry, Video, LEDs, and Buzzer
+
+11.1 Telemetry
+
+Telemetry provides a communication path for information between the UAV
+and an external device. Depending on the hardware and firmware, this can
+include flight status, battery measurements, navigation information, or
+diagnostic data.
+
+The protocol, signal voltage, and connector pinout depend on the
+selected telemetry module. Telemetry functionality must be implemented
+in firmware; the connector alone does not provide it.
+
+11.2 Video transmitter and video overlay
+
+The schematic contains a video-related circuit that appears to use an
+AT7456E-family video-overlay device; confirm the exact part number and
+implementation.
+
+A video-overlay circuit can combine camera imagery with text or
+graphical information before the signal is sent to compatible
+transmission hardware. Possible overlay information includes battery
+voltage, flight time, or status, but these features require appropriate
+hardware support and firmware.
+
+Verify the camera format, overlay-device requirements, supply voltage,
+clock, video input/output levels, and transmitter compatibility. The
+video circuit must be tested as a separate signal path.
+
+11.3 LEDs
+
+LEDs provide visual status indications. Their meaning depends on the
+circuit wiring and firmware.
+
+A series resistor limits LED current. For a simple LED circuit:
+
+R = (VS - VF) / IF
+
+where VS is the supply voltage, VF is the LED forward voltage, and
+IF is the desired current.
+
+Choose the resistor using the actual LED specifications and the
+controller pin's current limits. If the load exceeds GPIO capability,
+use a suitable driver.
+
+11.4 Buzzer
+
+The buzzer connector allows an audible indicator to be attached.
+Firmware may use it for startup indications, warnings, or fault alerts.
+
+Verify the buzzer's voltage and current. If it draws more current than
+the controller pin can safely supply, use a transistor or other suitable
+driver stage. Do not assume the buzzer can be driven directly from a
+GPIO.
+
+12. Communication Interface Summary
+
+Interface               Intended use in this design  Checks
+
+SPI                     IMUs and external flash      Pin mapping, chip
+select, clock mode,
+voltage
+
+I2C                     Barometer and compass        SDA/SCL mapping,
+interface                    pull-ups, bus voltage
+
+UART                    GNSS, telemetry, serial      TX/RX direction, baud
+debug where implemented      rate, voltage
+
+USB                     Computer connection through  Type-C configuration,
+the designed USB path        data routing,
+protection
+
+Receiver interface      Pilot-command input          Protocol, voltage,
+connector pinout
+
+ESC interface           Motor-control signals        Output protocol,
+voltage, channel
+mapping
+
+13. PCB Layout Guidelines
+
+13.1 Switching power supplies
+
+Place the regulator, inductor, input capacitors, and output
+capacitors according to the regulator datasheet.
+
+Minimize high-current switching loops.
+
+Keep switching nodes away from sensitive sensor inputs and other
+noise-sensitive traces.
+
+Verify the inductor current rating and thermal performance.
+
+Route feedback sensing as recommended by the regulator manufacturer.
+
+Confirm that copper widths, vias, and connectors support the
+expected current.
+
+13.2 Ground and return paths
+
+Provide low-impedance ground connections.
+
+Maintain a suitable ground reference under critical signal routes
+where possible.
+
+Avoid unnecessary breaks in the return path.
+
+Check the return paths of USB and other fast signals.
+
+Do not create arbitrary ground splits without a documented reason.
+
+13.3 Sensor placement
+
+Place IMUs away from switching nodes and high-current paths where
+practical.
+
+Follow the sensor's orientation and layout recommendations.
+
+Place local decoupling close to each sensor's supply pins.
+
+Consider vibration and mechanical mounting.
+
+Keep the barometer's pressure port exposed to suitable ambient
+pressure while protecting it from direct airflow and contamination
+as recommended by the sensor manufacturer.
+
+13.4 USB and high-speed signals
+
+Follow the requirements for the actual USB speed and interface.
+
+Use suitable differential routing where required.
+
+Minimize stubs and discontinuities.
+
+Place ESD protection close to the connector where appropriate.
+
+Confirm the connector shield and ground strategy.
+
+13.5 Four-layer stackup
+
+A four-layer board may use a stackup such as: 1. Top signal and
+components. 2. Inner ground plane. 3. Inner power plane or power
+distribution. 4. Bottom signal and components.
+
+The final stackup must be confirmed with the PCB fabricator. A
+continuous ground reference and appropriate power distribution are
+important; the exact copper weight and trace widths must be calculated
+from current, allowable temperature rise, copper thickness, geometry,
+and fabrication limits.
+
+14. Verification and Testing Plan
+
+14.1 Power tests
+
+Inspect the board for solder bridges and assembly errors.
+
+Check for shorts between power rails and ground before applying
+power.
+
+Use a current-limited bench supply for initial power-up.
+
+Measure each output rail with a multimeter.
+
+Check startup behavior and output ripple with suitable instruments.
+
+Monitor regulator and inductor temperatures under the intended load.
+
+Verify that the 10 V rail, if needed, remains within specification
+across the input range.
+
+14.2 Controller tests
+
+Confirm the required power domains.
+
+Verify clock and reset behavior.
+
+Confirm the documented programming/debug connection.
+
+Test UART communication if supported.
+
+Verify that firmware can access the intended peripherals.
+
+Check the boot and flash configuration.
+
+14.3 Sensor tests
+
+Read acceleration and angular-velocity data from the primary IMU.
+
+Read data from the secondary IMU.
+
+Check that readings change plausibly when the board is moved.
+
+Read pressure data from the barometer.
+
+Verify GNSS communication and valid receiver data.
+
+Verify compass communication and calibration if a compass is
+connected.
+
+Check for sensor errors, disconnected devices, and implausible
+values.
+
+14.4 Interface tests
+
+Confirm receiver communication and command decoding.
+
+Verify telemetry data transfer.
+
+Test each motor-control output without propellers installed.
+
+Verify flash access if the system uses external flash.
+
+Check USB or USB-UART communication.
+
+Test the video input/output path separately.
+
+Verify LEDs and buzzer behavior.
+
+14.5 System-level tests
+
+Before flight: - Confirm sensor calibration. - Verify motor order and
+direction. - Test receiver-loss behavior and required failsafe
+responses. - Verify power stability under changing loads. - Check
+operating temperature. - Conduct controlled ground tests in a safe
+environment. - Do not fly until hardware, firmware, and failsafe
+behavior have been validated.
+
+15. Common Design Risks to Check
+
+Risk                    Why it matters          Recommended action
+
+Incorrect supply        Can damage the          Verify every power pin
+voltage                 controller or sensors   against datasheets
+
+Insufficient regulator  Can cause voltage       Calculate load current
+capacity                droop, resets, or       and check thermal
+overheating             limits
+
+10 V rail with low      A buck converter cannot Check the full
+battery input           boost a lower input to  battery-voltage range
+10 V                    and actual load
+
+Incorrect USB-C CC      May prevent proper      Follow the Type-C
+wiring                  connection detection    design requirements for
+the board's role
+
+Incorrect UART TX/RX    Prevents communication  Check signal direction
+mapping                                         at both connectors
+
+Incorrect SPI chip      Can prevent peripheral  Verify each CS
+select                  communication           connection and firmware
+configuration
+
+Missing or misplaced    Can cause noise or      Follow IC placement
+decoupling              instability             guidance
+
+Sensor vibration or     Can degrade measurement Review placement and
+magnetic interference   quality                 calibration
+
+Wrong ESC connector     Can expose signal pins  Verify the ESC pinout
+assumptions             to an incorrect voltage and power path
+or current
+
+16. Conclusion
+
+The THEJAS32-based FPV Flight Control and Navigation System schematic
+brings together power management, controller circuitry, primary and
+secondary motion sensors, a barometric pressure sensor, GNSS and compass
+interfaces, USB/UART connectivity, external flash, receiver and ESC
+connections, telemetry, video-related circuitry, and status indicators.
+
+Together, these blocks provide a hardware foundation for a
+flight-control platform. The controller is intended to acquire
+measurements, process pilot commands, execute the flight-control
+firmware, and generate motor-control signals for external ESCs.
+
+The quality and reliability of the final system depend on correct
+component selection, verified pin assignments, regulator and thermal
+calculations, careful PCB layout, compatible firmware, and staged
+hardware testing. The schematic should therefore be treated as a design
+to verify---not as proof that the completed board is already
+flight-ready.
+
+17. Project Information
+
+Project: THEJAS32-Based FPV Flight Control and Navigation System
+(FCNS)
+
+Domain: Embedded Systems, UAV Electronics, Flight Control, and
+PCB Design
+
+EDA Tool: Altium Designer
+
+Main Controller: THEJAS32 SoC
+
+Primary IMU: ICM-42688-P
+
+Secondary IMU: BMI270
+
+Barometric Sensor: DPS310
+
+Navigation Interfaces: GNSS and compass
+
+Power Architecture: Battery input with regulated power rails.
